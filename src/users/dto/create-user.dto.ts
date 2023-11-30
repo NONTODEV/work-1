@@ -1,30 +1,45 @@
-import { IsNotEmpty, IsOptional, IsString } from "@nestjs/class-validator";
-import { ApiProperty } from "@nestjs/swagger";
+import { ApiProperty } from '@nestjs/swagger';
+import { IsArray, IsEmail, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 export class CreateUserDto {
-    @ApiProperty({
-        type:String,
-        example:'email@gmail.com',
-        required: true
-    })
-    @IsString()
-    @IsNotEmpty()
-    email: string;
+  @ApiProperty({
+    example: 'jeanpi3rm@gmail.com',
+    description: 'The email of the user',
+  })
+  @IsEmail()
+  email: string;
 
-    @ApiProperty({
-        type:String,
-        example:'123456789',
-        required: true
-    })
-    @IsString()
-    @IsNotEmpty()
-    password: string;
+  @ApiProperty({
+    example: 'Jeanpier',
+    description: 'The name of the user',
+  })
+  @IsNotEmpty()
+  @IsString()
+  readonly name: string;
 
-    @ApiProperty({
-        type:String,
-        example:'Notfound',
-        required: false
-    })
-    @IsOptional()
-    name?: string | null;
-  }
+  @ApiProperty({
+    example: 'Mendoza',
+    description: 'The surname of the user',
+  })
+  @IsNotEmpty()
+  @IsString()
+  readonly surname: string;
+
+  @ApiProperty({
+    example: '1234',
+    description: 'The password of the user',
+  })
+  @IsNotEmpty()
+  @IsString()
+  password: string;
+
+  @ApiProperty({
+    example: 22,
+    description: 'The age of the user',
+    required: false,
+  })
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  favoriteFoods?: string[];
+}

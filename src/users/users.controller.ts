@@ -1,40 +1,47 @@
-import {
-  Controller,
-  Post,
-  Body,
-  UnauthorizedException 
-} from '@nestjs/common';
-import { UsersService } from './users.service';
+import { Body, Controller, Delete, Get, Param, Patch, Post } from '@nestjs/common';
+import { ApiCreatedResponse, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CreateUserDto } from './dto/create-user.dto';
-import { User } from './entities/user.entity';
-import { ApiResponse } from '@nestjs/swagger';
-import { LoginDto } from './dto/login.dto';
+import { FindOneParams } from './dto/find-one-params.dto';
+import { User } from './schemas/user.schema';
+import { UsersService } from './users.service';
 
-@Controller('auth')
+// @UseInterceptors(ClassSerializerInterceptor)
+@ApiTags('users')
+@Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  @Post('register')
-  @ApiResponse({ status: 201, description: 'The record has been successfully created.'})
-  @ApiResponse({ status: 403, description: 'Forbidden.'})
-  create(@Body() createUserDto: CreateUserDto): Omit<User, 'password'> {
-    const createdUser = this.usersService.create(createUserDto);
-    return createdUser;
+  @Get()
+  @ApiOperation({ description: 'Get all users' })
+  @ApiOkResponse({
+    description: 'The users were successfully obtained.',
+    type: [User],
+  })
+  async getAll(): Promise<User[]> {
+    return this.usersService.findAll();
   }
 
-  @Post('login')
-  @ApiResponse({ status: 200, description: 'Login successful.' })
-  @ApiResponse({ status: 401, description: 'Unauthorized.' })
-  async login(@Body() loginDto: LoginDto): Promise<{ token: string } | null> {
-    const { email, password } = loginDto;
-    const result = await this.usersService.login(email, password);
+  @Get(':userId')
+  @ApiOperation({
+    description: 'Get a user by userId.',
+  })
+  @ApiOkResponse({
+    description: 'The user was successfully obtained.',
+    type: User,
+  })
+  async getById(@Param() { userId }: FindOneParams): Promise<User> {
+    return this.usersService.findById(userId);
+  }
 
-    if (!result) {
-      throw new UnauthorizedException('Email or password does not match');
-    }
+  @Post()
+  @ApiOperation({ description: 'Create a user.' })
+  @ApiCreatedResponse({
+    description: 'The user has been successfully created.',
+    type: User,
+  })
+  async create(@Body() user: CreateUserDto): Promise<User> {
+    return this.usersService.create(user);
+  }
 
-    return result;
+  
 }
-}
-
-
